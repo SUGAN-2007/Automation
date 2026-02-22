@@ -13,17 +13,10 @@ function isHomepage(url) {
   }
 }
 // --- BEGIN user-updated blocklist and filtering ---
-const blockedDomains = ["zoominfo", "statista", "golden", "linkedin", "wikipedia", "ambitionbox"]
+const blockedDomains = ["gov", "treasury", "federalregister", "freedomhouse", "ofac", "cisa", "malware", "faq", "report"]
 // --- END user-updated blocklist ---
-const blockedUrlPatterns = [/\/blog\//i, /\/lists?\//i, /\/review(s)?\//i, /\/directory/i, /\/jobs?\//i, /\/careers?\//i, /\/news\//i, /\/about\//i, /\?page=/i, /\/article(s)?\//i, /\/join\//i, /\/contact(s)?\//i, /\/forum(s)?\//i, /\/events\//i]
-function domainIsBlocked(url) {
-  try {
-    const u = new URL(url)
-    return blockedDomains.some(d => u.hostname.includes(d))
-  } catch {
-    return true
-  }
-}
+const blockedUrlPatterns = [/\/blog\//i, \/\/lists?\//i, /\/review(s)?\//i, /\/directory/i, /\/jobs?\//i, /\/careers?\//i, /\/news\//i, /\/about\//i, /\?page=/i, /\/article(s)?\//i, /\/join\//i, /\/contact(s)?\//i, /\/forum(s)?\//i, /\/events\//i]
+
 function urlHasBlockedPattern(url) {
   return blockedUrlPatterns.some(pattern => pattern.test(url))
 }
@@ -39,14 +32,14 @@ const { getJson } = require("serpapi")
       throw new Error("SERPAPI_API_KEY is required (env variable). Add it to the automation config.")
     }
     console.log(`Discovering vendors via SerpAPI for: ${industry}, ${country}, max: ${maxVendors}`)
-    // Per user request, this query ensures only official company homepages are returned (no research, blogs, data portals, or listings).
-    const query = `Return ${maxVendors} official corporate websites of major retail supermarket chains operating in ${country}. Do not include research websites, blog posts, data portals, or listing pages. Only return official company domains.`
+    // Updated query: less restrictive, more open to official/major sites with visible websites and Wikipedia
+    const query = `Top supermarket companies in ${country}. Include official websites, Wikipedia, and known business portals, but avoid government and compliance results.`
     const params = {
       engine: "google",
       api_key: serpapiApiKey,
       q: query,
       device: "desktop",
-      num: Math.max(10, maxVendors * 4), // Search more and filter down
+      num: 25,
       hl: "en",
       no_cache: true,
       safe: "active"
@@ -63,34 +56,41 @@ const { getJson } = require("serpapi")
       throw new Error("No results from SerpAPI.")
     }
 
+    console.log("[Debug] Raw search homepages:",
+      resultsRaw.organic_results.map(r => `${r.title} => ${r.link}`).join(" | ")
+    )
     // Parse organic results for unique valid homepages
-    let vendorArr = []
+    let vendors = []
     const usedDomains = new Set()
     for (const item of resultsRaw.organic_results) {
       if (item.title && item.link && item.title.length > 2 && item.link.startsWith("http")) {
         const urlObj = new URL(item.link)
-        // Allow only homepages and filter blocked domains/patterns
         const fullUrl = urlObj.origin + "/"
-        // --- BEGIN user-preferred direct website blocklist filtering ---
-        if (!blockedDomains.some(d => fullUrl.includes(d)) && !urlHasBlockedPattern(fullUrl) && isHomepage(fullUrl) && !usedDomains.has(urlObj.hostname)) {
-          // --- END user-preferred filter ---
+        if (!urlHasBlockedPattern(fullUrl) && isHomepage(fullUrl) && !usedDomains.has(urlObj.hostname)) {
           usedDomains.add(urlObj.hostname)
-          vendorArr.push({
+          vendors.push({
             name: item.title.split(" - ")[0].replace(/\|.*/, "").trim(),
             website: fullUrl
           })
         }
       }
-      if (vendorArr.length >= maxVendors) break
+      if (vendors.length >= maxVendors) break
     }
-
-    if (vendorArr.length === 0) {
+    console.log("[Debug] Candidates after homepage/url filtering (pre-blocklist):", vendors.map(v => v.website).join(", "))
+    // Apply user-provided blocklist only to website (case-insensitive)
+    const preBlocklistCandidates = [...vendors]
+    vendors = vendors.filter(v => !blockedDomains.some(word => v.website.toLowerCase().includes(word)))
+    console.log("[Debug] Candidates after blocklist filtering:", vendors.map(v => v.website).join(", "))
+    if (vendors.length === 0) {
+      // Give full pre-blocklist vendor dump for manual curation!
+      console.error("[Debug] No vendors remaining after filtering. Manual review of candidates BEFORE blocklist:")
+      console.log("[Debug] MANUAL_CURATION_RAW (pre-blocklist HOME candidate websites):", preBlocklistCandidates.map(v => `${v.name} => ${v.website}`).join(" | "))
       throw new Error("No valid companies found in SerpAPI search results after filtering.")
     }
-    console.log("Discovered vendors:", vendorArr.map(v => v.name).join(", "))
-    setContext("vendors", vendorArr)
+    console.log("Discovered vendors:", vendors.map(v => v.name).join(", "))
+    setContext("vendors", vendors)
   } catch (err) {
     console.error("Error in Find Vendors (SerpAPI) step:", err.message)
     process.exit(1)
   }
-})()
+})();
