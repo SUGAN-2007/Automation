@@ -39,8 +39,8 @@ const { getJson } = require("serpapi")
       throw new Error("SERPAPI_API_KEY is required (env variable). Add it to the automation config.")
     }
     console.log(`Discovering vendors via SerpAPI for: ${industry}, ${country}, max: ${maxVendors}`)
-
-    const query = `top ${maxVendors} companies in ${industry} industry in ${country}`
+    // Per user request, this query ensures only official company homepages are returned (no research, blogs, data portals, or listings).
+    const query = `Return ${maxVendors} official corporate websites of major retail supermarket chains operating in ${country}. Do not include research websites, blog posts, data portals, or listing pages. Only return official company domains.`
     const params = {
       engine: "google",
       api_key: serpapiApiKey,
