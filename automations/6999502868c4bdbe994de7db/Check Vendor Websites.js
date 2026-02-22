@@ -1,4 +1,4 @@
-// Step 2: Check website availability using pingUrls for each vendor
+ome// Step 2: Check website availability using pingUrls for each vendor
 ;(async () => {
   try {
     const vendors = getContext("vendors") || []

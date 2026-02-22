@@ -60,7 +60,8 @@ const { getJson } = require("serpapi")
       throw new Error("No results from SerpAPI.")
     }
 
-    console.log("[Debug] Raw search homepages:", resultsRaw.organic_results.map(r => `${r.title} => ${r.link}`).join(" | "))
+    // [Debug] Raw search homepages log removed by user request
+
     // Parse organic results for unique valid homepages
     let vendors = []
     const usedDomains = new Set()
@@ -86,7 +87,7 @@ const { getJson } = require("serpapi")
     if (vendors.length === 0) {
       // Give full pre-blocklist vendor dump for manual curation!
       console.error("[Debug] No vendors remaining after filtering. Manual review of candidates BEFORE blocklist:")
-      console.log("[Debug] MANUAL_CURATION_RAW (pre-blocklist HOME candidate websites):", preBlocklistCandidates.map(v => `${v.name} => ${v.website}`).join(" | "))
+      // console.log("[Debug] MANUAL_CURATION_RAW (pre-blocklist HOME candidate websites):", preBlocklistCandidates.map(v => `${v.name} => ${v.website}`).join(" | ")) // Suppressed raw output by user request
       throw new Error("No valid companies found in SerpAPI search results after filtering.")
     }
     // ----------------------------- STRUCTURED DISCOVERY LOG -----------------------------
