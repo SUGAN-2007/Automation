@@ -15,7 +15,8 @@ function isHomepage(url) {
 // --- BEGIN user-updated blocklist and filtering ---
 const blockedDomains = ["gov", "treasury", "federalregister", "freedomhouse", "ofac", "cisa", "malware", "faq", "report"]
 // --- END user-updated blocklist ---
-const blockedUrlPatterns = [/\/blog\//i, \/\/lists?\//i, /\/review(s)?\//i, /\/directory/i, /\/jobs?\//i, /\/careers?\//i, /\/news\//i, /\/about\//i, /\?page=/i, /\/article(s)?\//i, /\/join\//i, /\/contact(s)?\//i, /\/forum(s)?\//i, /\/events\//i]
+// FIXED: invalid regex, scan for similar
+const blockedUrlPatterns = [/\/blog\//i, /\/lists\?/i, /\/review(s)?\//i, /\/directory/i, /\/jobs?\//i, /\/careers?\//i, /\/news\//i, /\/about\//i, /\?page=/i, /\/article(s)?\//i, /\/join\//i, /\/contact(s)?\//i, /\/forum(s)?\//i, /\/events\//i]
 
 function urlHasBlockedPattern(url) {
   return blockedUrlPatterns.some(pattern => pattern.test(url))
@@ -56,9 +57,7 @@ const { getJson } = require("serpapi")
       throw new Error("No results from SerpAPI.")
     }
 
-    console.log("[Debug] Raw search homepages:",
-      resultsRaw.organic_results.map(r => `${r.title} => ${r.link}`).join(" | ")
-    )
+    console.log("[Debug] Raw search homepages:", resultsRaw.organic_results.map(r => `${r.title} => ${r.link}`).join(" | "))
     // Parse organic results for unique valid homepages
     let vendors = []
     const usedDomains = new Set()
@@ -93,4 +92,4 @@ const { getJson } = require("serpapi")
     console.error("Error in Find Vendors (SerpAPI) step:", err.message)
     process.exit(1)
   }
-})();
+})()
