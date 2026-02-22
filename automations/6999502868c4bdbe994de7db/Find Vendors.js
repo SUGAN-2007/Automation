@@ -13,10 +13,10 @@ function isHomepage(url) {
   }
 }
 // --- BEGIN user-updated blocklist and filtering ---
-const blockedDomains = ["gov", "treasury", "federalregister", "freedomhouse", "ofac", "cisa", "malware", "faq", "report"]
+const blockedDomains = ["gov", "treasury", "federalregister", "freedomhouse", "ofac", "cisa", "malware", "faq", "report", "wikipedia", "blog", "article", "post"]
 // --- END user-updated blocklist ---
 // FIXED: invalid regex, scan for similar
-const blockedUrlPatterns = [/\/blog\//i, /\/lists\//i, /\/reviews?\//i, /\/directory/i, /\/jobs?\//i, /\/careers?\//i, /\/news\//i, /\/about\//i, /\?page=/i, /\/articles?\//i, /\/join\//i, /\/contacts?\//i, /\/forums?\//i, /\/events\//i]
+const blockedUrlPatterns = [/\/blog\//i, /\/lists\//i, /\/reviews?/i, /\/directory/i, /\/jobs?/i, /\/careers?/i, /\/news\//i, /\/about\//i, /\?page=/i, /\/articles?/i, /\/join\//i, /\/contacts?/i, /\/forums?/i, /\/events\//i, /\/posts?/i]
 
 function urlHasBlockedPattern(url) {
   return blockedUrlPatterns.some(pattern => pattern.test(url))
@@ -33,8 +33,8 @@ const { getJson } = require("serpapi")
       throw new Error("SERPAPI_API_KEY is required (env variable). Add it to the automation config.")
     }
     console.log(`Discovering vendors via SerpAPI for: ${industry}, ${country}, max: ${maxVendors}`)
-    // Updated query: less restrictive, more open to official/major sites with visible websites and Wikipedia
-    const query = `Top supermarket companies in ${country}. Include official websites, Wikipedia, and known business portals, but avoid government and compliance results.`
+    // Updated query: less restrictive, more open to official/major sites
+    const query = `Top supermarket companies in ${country}. Include official websites and known business portals, but avoid government, compliance, articles, Wikipedia, blogs, or post results.`
     const params = {
       engine: "google",
       api_key: serpapiApiKey,
