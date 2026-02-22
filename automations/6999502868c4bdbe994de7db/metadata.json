@@ -1,11 +1,11 @@
 {
   "automationId": "6999502868c4bdbe994de7db",
   "automationName": "Unnamed Automation",
-  "version": "v13",
+  "version": "v14",
   "mode": "multi-file",
   "dependencies": [
     {
-      "id": "1771767886213_5",
+      "id": "1771776404030_5",
       "name": "serpapi",
       "version": "latest"
     }
@@ -16,5 +16,5 @@
     "MAX_VENDORS",
     "SERPAPI_API_KEY"
   ],
-  "syncedAt": "2026-02-22T13:59:24.446Z"
+  "syncedAt": "2026-02-22T16:09:25.441Z"
 }

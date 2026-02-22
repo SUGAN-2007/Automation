@@ -16,7 +16,7 @@ function isHomepage(url) {
 const blockedDomains = ["gov", "treasury", "federalregister", "freedomhouse", "ofac", "cisa", "malware", "faq", "report"]
 // --- END user-updated blocklist ---
 // FIXED: invalid regex, scan for similar
-const blockedUrlPatterns = [/\/blog\//i, /\/lists\?/i, /\/review(s)?\//i, /\/directory/i, /\/jobs?\//i, /\/careers?\//i, /\/news\//i, /\/about\//i, /\?page=/i, /\/article(s)?\//i, /\/join\//i, /\/contact(s)?\//i, /\/forum(s)?\//i, /\/events\//i]
+const blockedUrlPatterns = [/\/blog\//i, /\/lists\//i, /\/reviews?\//i, /\/directory/i, /\/jobs?\//i, /\/careers?\//i, /\/news\//i, /\/about\//i, /\?page=/i, /\/articles?\//i, /\/join\//i, /\/contacts?\//i, /\/forums?\//i, /\/events\//i]
 
 function urlHasBlockedPattern(url) {
   return blockedUrlPatterns.some(pattern => pattern.test(url))
@@ -49,6 +49,9 @@ const { getJson } = require("serpapi")
     let resultsRaw = null
     try {
       resultsRaw = await getJson(params)
+      // --- INSERTED LOG STATEMENT ---
+      console.log(`Search returned ${resultsRaw.organic_results.length} results`)
+      // --- END INSERTED LOG STATEMENT ---
     } catch (err) {
       console.error("Error fetching from SerpAPI:", err)
       throw new Error("SerpAPI request failed.")
@@ -86,6 +89,10 @@ const { getJson } = require("serpapi")
       console.log("[Debug] MANUAL_CURATION_RAW (pre-blocklist HOME candidate websites):", preBlocklistCandidates.map(v => `${v.name} => ${v.website}`).join(" | "))
       throw new Error("No valid companies found in SerpAPI search results after filtering.")
     }
+    // ----------------------------- STRUCTURED DISCOVERY LOG -----------------------------
+    console.log({ stage: "discovery", industry, country, candidates: vendors.length })
+    console.log("----- DISCOVERY PHASE COMPLETE -----")
+    // ------------------------------------------------------------------------------------
     console.log("Discovered vendors:", vendors.map(v => v.name).join(", "))
     setContext("vendors", vendors)
   } catch (err) {

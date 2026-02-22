@@ -10,6 +10,14 @@
     const pingResults = await pingUrls(urls)
     const urlMap = {}
     ;(pingResults.results || []).forEach(r => {
+      // Domain log (user format)
+      let domain = null
+      try {
+        domain = new URL(r.url).hostname
+        console.log(`Checking: ${domain}`)
+      } catch (err) {
+        console.log(`Checking: INVALID_URL (${r.url})`)
+      }
       urlMap[r.url] = r.success
       console.log(`${r.url}: ${r.success ? "LIVE" : "DOWN"}, Latency: ${r.latency || "?"}ms`)
     })
