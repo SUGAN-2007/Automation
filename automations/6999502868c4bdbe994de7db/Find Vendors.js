@@ -1,4 +1,4 @@
-const industry = process.env.INDUSTRY
+"const industry = process.env.INDUSTRY
 const country = process.env.COUNTRY
 const maxVendors = parseInt(process.env.MAX_VENDORS || "3", 10)
 const serpapiApiKey = process.env.SERPAPI_API_KEY // Add this env variable in Automation config
